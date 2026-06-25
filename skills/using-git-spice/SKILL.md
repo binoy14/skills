@@ -25,7 +25,7 @@ A **PR stack** is a sequence of small PRs that each build on the one below it, i
 - **No blocking** — keep building on top (branch C) while branch A is still in review, instead of waiting.
 - **Clean history** — every branch is one logical change with its own PR, base, and description.
 
-The reason people *avoid* stacking with plain git is bookkeeping: tracking which branch is based on which, rebasing the whole chain when a lower branch changes, and retargeting PRs as branches merge. git-spice automates exactly that bookkeeping — which is why it's worth using even when a change is small.
+The reason people _avoid_ stacking with plain git is bookkeeping: tracking which branch is based on which, rebasing the whole chain when a lower branch changes, and retargeting PRs as branches merge. git-spice automates exactly that bookkeeping — which is why it's worth using even when a change is small.
 
 ## When to use this skill
 
@@ -122,11 +122,12 @@ gs --no-prompt stack submit --fill
 This pushes every branch and opens/updates a PR per branch, each targeting the branch below. PR descriptions get a navigation comment linking the stack. Re-running is **idempotent** — existing PRs are updated, not duplicated.
 
 Variants:
+
 - `gs --no-prompt downstack submit --fill` — submit current branch and everything below it (skip upstack work in progress).
 - `gs --no-prompt branch submit --title T --body B` — submit only the current branch.
 - Add `--update-only` to update existing PRs without creating new ones for unsubmitted branches.
 
-**Check for a PR template first.** Before submitting, look for a repo PR template — `.github/PULL_REQUEST_TEMPLATE.md`, `.github/pull_request_template.md`, `.github/PULL_REQUEST_TEMPLATE/*.md` (multiple choices), or the same names at repo root / under `docs/`. git-spice *does* discover these (`spice.submit.template`), but it only pre-fills them in the **interactive editor** — which hangs under `--no-prompt`. And `--fill` ignores the template entirely (it fills body from the commit message). So when a template exists and you're non-interactive:
+**Check for a PR template first.** Before submitting, look for a repo PR template — `.github/PULL_REQUEST_TEMPLATE.md`, `.github/pull_request_template.md`, `.github/PULL_REQUEST_TEMPLATE/*.md` (multiple choices), or the same names at repo root / under `docs/`. git-spice _does_ discover these (`spice.submit.template`), but it only pre-fills them in the **interactive editor** — which hangs under `--no-prompt`. And `--fill` ignores the template entirely (it fills body from the commit message). So when a template exists and you're non-interactive:
 
 ```
 # fill the template's sections with real content, then pass it as the body.
@@ -197,21 +198,21 @@ gs --no-prompt stack submit --fill          # drop -u so gs opens a NEW PR for t
 
 ## Quick reference
 
-| Intent | Command | Shorthand |
-| --- | --- | --- |
-| Init repo | `gs repo init --trunk main --remote origin` | `gs ri` |
-| Track existing branch | `gs branch track` | `gs btr` |
-| Create stacked branch | `gs branch create <name> -m "msg"` | `gs bc` |
-| Insert into middle | `gs branch create --insert <name>` | — |
-| Visualize stack | `gs log short` / `gs log long` | `gs ls` / `gs ll` |
-| Navigate | `gs up` / `gs down` / `gs top` / `gs bottom` / `gs trunk` | `gs u` / `gs d` / `gs U` / `gs D` |
-| Checkout branch | `gs branch checkout <name>` | `gs bco` |
-| Restack one / upstack / whole | `gs branch restack` / `gs upstack restack` / `gs stack restack` | `gs br` / `gs usr` / `gs sr` |
+| Intent                                      | Command                                                                              | Shorthand                               |
+| ------------------------------------------- | ------------------------------------------------------------------------------------ | --------------------------------------- |
+| Init repo                                   | `gs repo init --trunk main --remote origin`                                          | `gs ri`                                 |
+| Track existing branch                       | `gs branch track`                                                                    | `gs btr`                                |
+| Create stacked branch                       | `gs branch create <name> -m "msg"`                                                   | `gs bc`                                 |
+| Insert into middle                          | `gs branch create --insert <name>`                                                   | —                                       |
+| Visualize stack                             | `gs log short` / `gs log long`                                                       | `gs ls` / `gs ll`                       |
+| Navigate                                    | `gs up` / `gs down` / `gs top` / `gs bottom` / `gs trunk`                            | `gs u` / `gs d` / `gs U` / `gs D`       |
+| Checkout branch                             | `gs branch checkout <name>`                                                          | `gs bco`                                |
+| Restack one / upstack / whole               | `gs branch restack` / `gs upstack restack` / `gs stack restack`                      | `gs br` / `gs usr` / `gs sr`            |
 | Submit branch / upstack / downstack / stack | `gs branch submit` / `gs upstack submit` / `gs downstack submit` / `gs stack submit` | `gs bs` / `gs uss` / `gs dss` / `gs ss` |
-| Sync trunk + prune merged | `gs repo sync` | `gs rs` |
-| Resume / abort rebase | `gs rebase continue` / `gs rebase abort` | `gs rbc` / `gs rba` |
-| Move branch onto new base | `gs branch onto <base>` | `gs bon` |
-| Delete branch (keep stack linear) | `gs branch delete <name>` | `gs bd` |
+| Sync trunk + prune merged                   | `gs repo sync`                                                                       | `gs rs`                                 |
+| Resume / abort rebase                       | `gs rebase continue` / `gs rebase abort`                                             | `gs rbc` / `gs rba`                     |
+| Move branch onto new base                   | `gs branch onto <base>`                                                              | `gs bon`                                |
+| Delete branch (keep stack linear)           | `gs branch delete <name>`                                                            | `gs bd`                                 |
 
 Full reference: `gs <cmd> --help` always works and lists every flag. Shorthand pattern: the bits in parentheses joined together (`gs branch (b) create (c)` → `gs bc`).
 
@@ -228,15 +229,15 @@ Full reference: `gs <cmd> --help` always works and lists every flag. Shorthand p
 
 ## Common mistakes
 
-| Mistake | Fix |
-| --- | --- |
-| Hangs forever on submit | Missing `--no-prompt` or `--fill`. Cancel; re-run with both. |
-| `gs branch create` makes an empty commit | Stage changes first (`git add ...`), or pass `-a`. |
-| Edited mid-stack branch; upstack PRs now wrong | Run `gs stack restack`, then `gs stack submit --fill`. |
-| Rebase conflict during `gs stack restack` | Resolve files, `git add`, then `gs rebase continue` (NOT `git rebase --continue`). |
+| Mistake                                         | Fix                                                                                                                                                                                                                                                                                   |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Hangs forever on submit                         | Missing `--no-prompt` or `--fill`. Cancel; re-run with both.                                                                                                                                                                                                                          |
+| `gs branch create` makes an empty commit        | Stage changes first (`git add ...`), or pass `-a`.                                                                                                                                                                                                                                    |
+| Edited mid-stack branch; upstack PRs now wrong  | Run `gs stack restack`, then `gs stack submit --fill`.                                                                                                                                                                                                                                |
+| Rebase conflict during `gs stack restack`       | Resolve files, `git add`, then `gs rebase continue` (NOT `git rebase --continue`).                                                                                                                                                                                                    |
 | PR opened against `main` instead of base branch | You ran `gs branch submit` from a branch whose base is `main` — that's expected for the bottom of the stack. For higher branches, ensure each was created via `gs branch create` (so it has a tracked base), not plain `git checkout -b`. Use `gs branch track --base <base>` to fix. |
-| "Cannot rebase onto multiple branches." | Background git fetcher (IDE/shell plugin) raced `gs`. Retry once; if persistent, disable autofetch. |
-| Forked repo: only trunk-based branches get PRs | Fork mode (v0.28+) only opens PRs for branches based on trunk. For a fully stacked series, request push access to upstream. |
+| "Cannot rebase onto multiple branches."         | Background git fetcher (IDE/shell plugin) raced `gs`. Retry once; if persistent, disable autofetch.                                                                                                                                                                                   |
+| Forked repo: only trunk-based branches get PRs  | Fork mode (v0.28+) only opens PRs for branches based on trunk. For a fully stacked series, request push access to upstream.                                                                                                                                                           |
 
 ## Gotchas worth knowing before you start
 
