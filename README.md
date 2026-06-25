@@ -7,13 +7,13 @@ A collection of installable [Agent Skills](https://skills.sh) — reusable instr
 Install every skill in this repo into your agent with one command:
 
 ```bash
-npx skills add binoy/skills
+npx skills add binoy14/skills
 ```
 
 Or install a single skill:
 
 ```bash
-npx skills add binoy/skills/commit-message
+npx skills add binoy14/skills/commit-message
 ```
 
 This makes the skills available to your agent, which will invoke them automatically when a task matches their description.
@@ -23,6 +23,7 @@ This makes the skills available to your agent, which will invoke them automatica
 ### Git
 
 - **commit-message** — Write a clear Conventional Commits message from the staged git diff. Use when asked to "write a commit message", "commit my changes", or "draft a commit".
+- **using-git-spice** — Use for any PR workflow — creating a branch, opening or updating a PR, and especially stacking related changes into a series of dependent PRs. Triggers whenever the user wants to start a branch, open/submit a PR, "split this into a stack", or mentions git-spice, gs, or stacked PRs/CRs.
 
 ## Skill Structure
 
@@ -43,7 +44,7 @@ skills/
 name: skill-name
 description: One line telling the agent exactly when to use this skill.
 metadata:
-  author: binoy
+  author: Binoy Patel
   version: "1.0.0"
   argument-hint: <optional-arg>
 ---

@@ -10,10 +10,16 @@
     "validate": "node scripts/validate.mjs",
     "format": "oxfmt .",
     "format:check": "oxfmt --check .",
-    "check": "pnpm validate && pnpm format:check"
+    "check": "pnpm validate && pnpm format:check",
+    "prepare": "husky"
   },
   "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^17.0.8",
     "oxfmt": "^0.56.0"
+  },
+  "lint-staged": {
+    "*.{js,mjs,cjs,ts,mts,cts,json,jsonc,md,yml,yaml}": "oxfmt --write"
   },
   "packageManager": "pnpm@11.9.0"
 }

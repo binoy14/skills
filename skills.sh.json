@@ -4,8 +4,8 @@
   "groupings": [
     {
       "title": "Git",
-      "description": "Skills for git workflows — crafting commits, messages, and related tasks.",
-      "skills": ["commit-message"]
+      "description": "Skills for git workflows — crafting commits and messages, and managing branches and stacked PRs.",
+      "skills": ["commit-message", "using-git-spice"]
     }
   ]
 }
