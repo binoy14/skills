@@ -1,6 +1,6 @@
 # Agent Skills
 
-A collection of installable [Agent Skills](https://skills.sh) — reusable instructions that teach AI coding agents (Claude Code, Cursor, etc.) how to perform specific tasks well.
+A collection of installable [Agent Skills](https://skills.sh) — reusable instructions that teach AI coding agents (Claude Code, Cursor, etc.) how to perform specific tasks.
 
 ## Installation
 
@@ -54,7 +54,7 @@ metadata:
 ---
 ```
 
-The `description` is the most important field — agents read it to decide whether a skill is relevant, so phrase it around the phrases a user would actually say.
+The `description` is the most important field — agents read it to decide whether a skill is relevant, so word it around what a user would actually say.
 
 The registry of skills and how they're grouped lives in [`skills.sh.json`](./skills.sh.json).
 
