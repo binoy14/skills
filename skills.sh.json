@@ -6,6 +6,11 @@
       "title": "Git",
       "description": "Skills for git workflows — crafting commits and messages, and managing branches and stacked PRs.",
       "skills": ["commit-message", "using-git-spice"]
+    },
+    {
+      "title": "Writing",
+      "description": "Skills for writing and editing prose — keeping tone human and free of AI tells.",
+      "skills": ["human-tone"]
     }
   ]
 }

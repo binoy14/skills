@@ -25,6 +25,10 @@ This makes the skills available to your agent, which will invoke them automatica
 - **commit-message** — Write a clear Conventional Commits message from the staged git diff. Use when asked to "write a commit message", "commit my changes", or "draft a commit".
 - **using-git-spice** — Use for any PR workflow — creating a branch, opening or updating a PR, and especially stacking related changes into a series of dependent PRs. Triggers whenever the user wants to start a branch, open/submit a PR, "split this into a stack", or mentions git-spice, gs, or stacked PRs/CRs.
 
+### Writing
+
+- **human-tone** — Write, edit, or proofread any human-facing text so it reads as human rather than machine-generated, stripping AI tells and puffery. Covers prose of any length and channel: articles, docs, PR descriptions, issue/review comments, commit bodies, emails, chat messages. Use when asked to "write" or "draft" something, "write copy", "proofread this", "review my writing", "improve/fix the tone", "make this sound less like AI", or "make it sound human".
+
 ## Skill Structure
 
 Each skill lives in its own folder under `skills/` and contains:
