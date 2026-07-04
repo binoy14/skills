@@ -9,7 +9,7 @@ metadata:
 
 # Commit Message
 
-Generate a high-quality commit message from the currently staged changes.
+Generate a commit message from the currently staged changes.
 
 ## How it works
 
