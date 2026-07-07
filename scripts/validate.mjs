@@ -21,7 +21,17 @@ function parseFrontmatter(text, file) {
   const fields = {};
   for (const line of match[1].split("\n")) {
     const m = line.match(/^(\w[\w-]*):\s*(.*)$/);
-    if (m) fields[m[1]] = m[2].replace(/^["']|["']$/g, "").trim();
+    if (!m) continue;
+    const [, key, raw] = m;
+    const isQuoted = /^"[\s\S]*"$/.test(raw) || /^'[\s\S]*'$/.test(raw);
+    // A bare (unquoted) YAML scalar can't contain ": " — real YAML parsers
+    // read it as a nested mapping key and throw, which silently drops the
+    // skill from discovery in downstream tools instead of erroring loudly.
+    if (!isQuoted && /:\s/.test(raw))
+      errors.push(
+        `${file}: field "${key}" has an unquoted value containing ": " — wrap it in quotes, this breaks YAML parsing`,
+      );
+    fields[key] = raw.replace(/^["']|["']$/g, "").trim();
   }
   return fields;
 }
