@@ -25,7 +25,7 @@ A **PR stack** turns one large change into a sequence of small PRs (`trunk → A
 
 ## CRITICAL: non-interactive use
 
-`gs` prompts interactively by default. In an agent shell that has no TTY, prompts hang the command. Always either:
+`gs` auto-detects a non-TTY stdin and disables prompting on its own, but don't rely on that detection — pass `--no-prompt` explicitly so behavior is the same whether or not the shell happens to have a pty. Always either:
 
 1. Pass `--no-prompt` globally **and** supply every required value via flags, or
 2. Use commands that don't need interactive input (most navigation/restack commands).
@@ -73,13 +73,10 @@ gs log short                 # visualize the stack
 
 **Commit bodies matter for `--fill`.** `gs stack submit --fill` uses the commit subject as the PR title and the commit body as the PR body. If you only pass `-m "subject"`, the PR body is empty.
 
-**`gs`'s `-m` is NOT git's `-m`.** Unlike `git commit` (where repeated `-m` flags concatenate into separate paragraphs), git-spice's `-m/--message` is a single scalar — passing it twice keeps only the **last** value and silently drops the subject. Verified: `gs branch create x -m "SUBJECT" -m "BODY"` produces a commit whose entire message is `BODY`. To give a branch a subject + body, use one of:
+**`-m` is repeatable (since v0.30.0)**, matching `git commit`: each `-m` becomes its own paragraph, so `-m "subject" -m "body"` gives a proper subject + body. On older git-spice, `-m` only took the last value — if commands silently drop the subject, that's the tell you're on a pre-v0.30 binary; upgrade or fall back to embedded newlines / `-F`:
 
 ```
-# single -m with embedded newlines (subject, blank line, body):
-gs --no-prompt branch create feat-a -m "feat: add A
-
-Implements A so that follow-up branches can build on it."
+gs --no-prompt branch create feat-a -m "feat: add A" -m "Implements A so that follow-up branches can build on it."
 
 # or read the message from a file:
 gs --no-prompt branch create feat-a -F /tmp/msg.txt
@@ -95,7 +92,7 @@ To insert a branch into the middle of an existing stack, checkout the spot and a
 gs --no-prompt stack submit --fill
 ```
 
-This pushes every branch and opens/updates a PR per branch, each targeting the branch below. PR descriptions get a navigation comment linking the stack. Re-running is **idempotent** — existing PRs are updated, not duplicated.
+This pushes every branch and opens/updates a PR per branch, each targeting the branch below. Each PR gets a navigation comment (posted as a PR comment, not part of the description) linking the stack. Re-running is **idempotent** — existing PRs are updated, not duplicated.
 
 Variants:
 
@@ -103,7 +100,7 @@ Variants:
 - `gs --no-prompt branch submit --title T --body B` — submit only the current branch.
 - Add `--update-only` to update existing PRs without creating new ones for unsubmitted branches.
 
-**Check for a PR template first.** Before submitting, look for a repo PR template — `.github/PULL_REQUEST_TEMPLATE.md`, `.github/pull_request_template.md`, `.github/PULL_REQUEST_TEMPLATE/*.md` (multiple choices), or the same names at repo root / under `docs/`. git-spice _does_ discover these (`spice.submit.template`), but it only pre-fills them in the **interactive editor** — which hangs under `--no-prompt`. And `--fill` ignores the template entirely (it fills body from the commit message). So when a template exists and you're non-interactive:
+**Check for a PR template first.** git-spice looks for `PULL_REQUEST_TEMPLATE.md`, `.github/PULL_REQUEST_TEMPLATE.md`, or `docs/PULL_REQUEST_TEMPLATE.md` (and the same three without `.md`) — no other paths, no lowercase variants, no directory of multiple templates. It only pre-fills a found template in the **interactive editor**, which hangs under `--no-prompt`. `--fill` does _not_ ignore the template — it appends the raw, unfilled template text onto the commit-derived body, which is worse than no template at all. So when a template exists and you're non-interactive:
 
 ```
 # fill the template's sections with real content, then pass it as the body.
@@ -124,12 +121,11 @@ Edit a branch that's not on top, then propagate:
 ```
 gs branch checkout feat-a
 # make edits, stage them
-gs --no-prompt commit amend             # or: commit create -m "..."
-gs --no-prompt stack restack            # rebase feat-b, feat-c onto new feat-a
+gs --no-prompt commit amend --no-edit   # or: commit create -m "..."; amend WITHOUT --no-edit/-m/-F opens $EDITOR and blocks
 gs --no-prompt stack submit --fill      # force-push only what changed
 ```
 
-`stack restack` is safe to run repeatedly. If a rebase hits a conflict, `gs` stops and tells you. Resolve it like a normal git rebase, then:
+`commit amend` and `commit create` restack the upstack (`feat-b`, `feat-c`) onto the new commit automatically — no separate `stack restack` needed. If you ever do need to force a manual restack (e.g. after resetting or cherry-picking outside `gs`), `gs --no-prompt stack restack` is safe to run repeatedly. If a restack hits a conflict, `gs` stops and tells you. Resolve it like a normal git rebase, then:
 
 ```
 # resolve files, `git add` them, then:
@@ -192,7 +188,7 @@ Full reference: `gs <cmd> --help` always works and lists every flag. Shorthand p
 - `--dry-run` / `-n`: preview submit without pushing.
 - `--update-only` / `-u`: don't create new PRs, only update existing ones.
 - `--no-publish`: push branches without opening PRs.
-- `--branch <name>`: target a specific branch instead of the current one (`stack submit`, `branch submit`, etc.).
+- `--branch <name>`: target a specific branch instead of the current one (`branch submit`, `downstack submit`, `upstack submit` — not `stack submit`, which always covers the whole current stack).
 
 ## Common mistakes and gotchas
 
@@ -205,5 +201,5 @@ Full reference: `gs <cmd> --help` always works and lists every flag. Shorthand p
 - **Push access to upstream is required** for stacked PRs — each branch must be pushed to the same repo the PRs target. No way around this on forks without write access.
 - **Squash-merge invalidates upstack history.** After a squash-merge, run `gs repo sync --restack` before continuing.
 - **Base-branch changes can dismiss approvals** on some repos. If a reviewer approves a mid-stack PR and the branch below it merges (causing the base to change), approvals may be dismissed. Repo-level setting, not a `gs` bug.
-- **`gs` does not call `git push` directly for submit** — it always pushes via its own logic. Don't `git push` branches manually; let `gs *submit` do it.
+- **`gs *submit` pushes branches itself, with safety checks** that refuse a push that would cause data loss (see `--force`). A manual `git push` skips those checks and can desync `gs`'s tracked state — let `gs *submit` push instead.
 - **Per-project CLAUDE.md rules still apply.** If a repo forbids direct commits to `main`, `gs` respects that — every branch you create with `gs branch create` is a feature branch.
