@@ -142,29 +142,26 @@ Do **not** run plain `git rebase --continue` mid-`gs` operation — `gs` tracks 
 
 ## Workflow: sync after merges
 
-After PRs land on trunk, do this **per merge** (merge bottom-up, one at a time):
+Merge bottom-up, one PR at a time, repeating this block per merge:
 
 ```
 gh pr merge <N> --squash --delete-branch
 gs --no-prompt repo sync --restack         # pull trunk, prune merged branches, restack upstack
-gs --no-prompt stack submit --fill -u      # update remaining PRs (force-push + retarget); -u skips closed PRs
+gs --no-prompt stack submit --fill -u      # force-push + retarget remaining PRs; -u skips closed CRs
 ```
 
-The `--restack` flag on `repo sync` does both pulling and rebasing in one shot. Without it you have to follow with `gs --no-prompt stack restack`.
+`--restack` on `repo sync` pulls and rebases in one shot (otherwise follow with `gs --no-prompt stack restack`).
 
-### Merging a stack of PRs cleanly
+**Two things can happen to PR #N+1 when PR #N merges:**
 
-To merge the entire stack, repeat the per-merge block above for each PR from the bottom up. Two specific behaviors to expect:
-
-**GitHub auto-retargets the next PR most of the time.** When you merge PR #N at the bottom of the stack, GitHub usually retargets PR #N+1's base from the deleted branch to the merge commit's base (often `main`). The skill workflow then force-pushes the rebased commits via `gs stack submit -u` so the diff is accurate.
-
-**Sometimes GitHub closes (does not retarget) the next PR instead.** This happens occasionally — especially when merging several stacked PRs in quick succession — and there's no public API to predict it. Symptoms: `gs repo sync` logs `WRN <branch>: #<N> was closed but not merged`, and a subsequent `gs stack submit --fill -u` says `Ignoring CR #<N> as it was closed`. GitHub also refuses to reopen a PR whose base branch was deleted (`Could not open the pull request`). Recovery:
+- **Usually:** GitHub retargets its base from the deleted branch to trunk automatically, and `stack submit -u` force-pushes the rebased commits.
+- **Occasionally** (unpredictable, more common when merging several stacked PRs in quick succession): GitHub closes PR #N+1 instead of retargeting it, and won't reopen it once its base branch is gone. `gs repo sync` logs `WRN <branch>: #<N> was closed but not merged`, and `stack submit --fill -u` logs `Ignoring CR #<N> as it was closed`. Recover by dropping `-u`:
 
 ```
-gs --no-prompt stack submit --fill          # drop -u so gs opens a NEW PR for the orphaned branch
+gs --no-prompt stack submit --fill          # opens a NEW PR for the orphaned branch against current trunk
 ```
 
-`gs` detects the closed PR and creates a fresh one against the current trunk. The closed PR stays closed; mention this in the new PR's description if reviewers need the history.
+The old PR stays closed — link it in the new PR's description if reviewers need the history.
 
 ## Quick reference
 
