@@ -1,6 +1,6 @@
 ---
 name: human-tone
-description: "Write, edit, or proofread any human-facing text so it reads as human rather than machine-generated, stripping AI tells and puffery. Applies to prose of any length and channel: articles, docs, PR descriptions, issue/review comments, commit bodies, emails, Slack/chat messages, and release notes. Use it whenever asked to write, draft, or proofread something, to review or clean up existing writing, or to make text sound less like AI and more human."
+description: "Write, edit, or proofread any human-facing text so it reads as human rather than machine-generated, stripping AI tells and puffery. Applies to prose of any length and channel, from long-form articles and documentation down to short forms like PR descriptions, code-review comments, commit messages, and chat replies. Use it whenever asked to write, draft, or proofread something, to review or clean up existing writing, or to make text sound less like AI and more human."
 metadata:
   author: Binoy Patel
   version: "1.0.0"
