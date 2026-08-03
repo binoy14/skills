@@ -1,0 +1,22 @@
+name: Skill token report
+
+on:
+  pull_request:
+
+permissions:
+  pull-requests: write
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
+        with:
+          go-version: stable
+      - run: go install github.com/agent-ecosystem/skill-validator/cmd/skill-validator@latest
+      - run: skill-validator check -o markdown --skip contamination skills/ > skill-report.md || true
+      - uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: skill-token-report
+          path: skill-report.md
