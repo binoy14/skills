@@ -10,6 +10,8 @@ metadata:
 
 git-spice is a CLI for managing **stacks of branches**, each branch building on the one below it, and submitting each as its own PR. The binary is `git-spice`; the conventional alias is `gs`. Docs: https://abhinav.github.io/git-spice/
 
+Forge support beyond GitHub: GitLab, Bitbucket, Gitea, and Forgejo/Codeberg all work the same way (auto-detected from the remote URL; override with `git config spice.forge.kind <name>` if the remote uses a non-standard host, e.g. an SSH alias). Everything below is written GitHub-flavored (`gh pr ...`, "PR") but applies equally — substitute the forge's CLI and "CR"/"MR" terminology.
+
 ## Core mental model
 
 - **trunk**: the integration branch (`main`/`master`). The bottom of every stack.
@@ -159,6 +161,8 @@ gs --no-prompt stack submit --fill          # opens a NEW PR for the orphaned br
 
 The old PR stays closed — link it in the new PR's description if reviewers need the history.
 
+**Experimental: let `gs` merge for you.** `gs branch merge` / `gs downstack merge` / `gs stack merge` (v0.30.0+, enable once with `git config spice.experiment.merge true`) poll the forge until each CR is mergeable, then merge bottom-up and restack/resubmit the upstack automatically — replacing the manual `gh pr merge` + `repo sync` + `stack submit` loop above. Still experimental; the manual loop is the safer default.
+
 ## Quick reference
 
 | Intent                                      | Command                                                                              | Shorthand                               |
@@ -189,6 +193,8 @@ Full reference: `gs <cmd> --help` always works and lists every flag. Shorthand p
 - `--update-only` / `-u`: don't create new PRs, only update existing ones.
 - `--no-publish`: push branches without opening PRs.
 - `--branch <name>`: target a specific branch instead of the current one (`branch submit`, `downstack submit`, `upstack submit` — not `stack submit`, which always covers the whole current stack).
+- `-l/--label`, `-r/--reviewer`, `-a/--assign` (repeatable, on all `*submit` commands): set labels/reviewers/assignees on creation; on update, these are added to (not replaced on) the existing CR.
+- `--nav-comment=true|false|multiple`: control the stack-navigation comment (default `true`); `spice.submit.navigationComment` sets a repo default.
 
 ## Common mistakes and gotchas
 
@@ -196,7 +202,7 @@ Full reference: `gs <cmd> --help` always works and lists every flag. Shorthand p
 | ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | PR opened against `main` instead of base branch | Expected for the bottom of the stack. For higher branches, ensure each was created via `gs branch create` (so it has a tracked base), not plain `git checkout -b`. Use `gs branch track --base <base>` to fix. |
 | "Cannot rebase onto multiple branches."         | Background git fetcher (IDE/shell plugin) raced `gs`. Retry once; if persistent, disable autofetch.                                                                                                            |
-| Forked repo: only trunk-based branches get PRs  | Fork mode (v0.28+) only opens PRs for branches based on trunk. For a fully stacked series, request push access to upstream.                                                                                    |
+| Forked repo: only trunk-based branches get PRs  | Fork mode (v0.28+, `gs repo init --upstream <upstream-remote> --remote <push-remote>`) only opens PRs for branches based on trunk. For a fully stacked series, request push access to upstream instead.        |
 
 - **Push access to upstream is required** for stacked PRs — each branch must be pushed to the same repo the PRs target. No way around this on forks without write access.
 - **Squash-merge invalidates upstack history.** After a squash-merge, run `gs repo sync --restack` before continuing.
