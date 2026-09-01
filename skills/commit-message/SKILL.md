@@ -20,13 +20,16 @@ Generate a commit message from the currently staged changes.
 
    ```
    <type>(<optional-scope>): <short summary>
-
-   <optional body explaining what and why, wrapped at 72 columns>
    ```
 
    Common types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`, `perf`.
 
 4. Keep the summary under 72 characters, in the imperative mood ("add", not "added").
+
+5. Default to summary-only. Add a body only if the diff needs context a title
+   can't carry — a non-obvious reason, a breaking change, a tradeoff. If so, keep
+   it to 1-2 short sentences, wrapped at 72 columns. Never restate the diff or
+   describe individual files; that's what `git show` is for.
 
 ## Output
 
